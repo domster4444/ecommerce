@@ -21,6 +21,21 @@ exports.createProduct = async (req, res, next) => {
     });
 };
 
+//?get a product detail
+exports.getProductDetail = async (req, res) => {
+  const product = await productSchema.findById(req.params.id);
+  if (!product) {
+    return res.status(500).json({
+      success: false,
+      message: 'product not found ',
+    });
+  }
+  res.status(200).json({
+    success: true,
+    product,
+  });
+};
+
 //?get all products
 exports.getAllProducts = async (req, res) => {
   const allProducts = await productSchema.find();
@@ -48,5 +63,21 @@ exports.updateProduct = async (req, res) => {
   res.status(200).json({
     success: true,
     product,
+  });
+};
+
+//? delete product --admin
+exports.deleteProduct = async (req, res) => {
+  const product = await productSchema.findById(req.params.id);
+  if (!product) {
+    return res.status(500).json({
+      success: false,
+      message: 'product not found to delete',
+    });
+  }
+  await product.remove();
+  res.status(200).json({
+    success: true,
+    message: 'product deleted successfully',
   });
 };
