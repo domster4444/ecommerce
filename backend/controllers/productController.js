@@ -6,23 +6,16 @@ const ApiFeatures = require('../utils/apifeatures');
 
 //*Create Products --Admin
 exports.createProduct = catchAsyncErrors(async (req, res, next) => {
-  const product = new productSchema(req.body);
+  // when user is logged in , we assigned req.user = {doc of user who logged in }
+  // passing req.body.user explicitly
+  req.body.user = req.user.id;
 
-  product
-    .save()
-    .then((data) => {
-      res.json({
-        message: 'createProduct --route working fine',
-        // data:document just created
-        data,
-      });
-    })
-    .catch((error) => {
-      console.log(error);
-      res.json({
-        message: 'something went wront while saving product to db : ' + error,
-      });
-    });
+  const product = await productSchema.create(req.body);
+
+  res.status(201).json({
+    success: true,
+    product,
+  });
 });
 
 //?get a product detail
