@@ -18,7 +18,7 @@ exports.createProduct = catchAsyncErrors(async (req, res, next) => {
     .catch((error) => {
       console.log(error);
       res.json({
-        message: 'something went wront while saving product to db',
+        message: 'something went wront while saving product to db : ' + error,
       });
     });
 });
