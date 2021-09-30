@@ -6,6 +6,8 @@ const errorMiddleware = require('./middleware/error');
 
 app.use(express.json());
 app.use(express.urlencoded());
+//? middleware for accessing cookie
+app.use(cookieParser());
 
 //? route imports
 
@@ -16,7 +18,5 @@ app.use('/api/v1', userRoute);
 
 //? middleware for error
 app.use(errorMiddleware);
-//? middleware for accessing cookie
-app.use(cookieParser());
 
 module.exports = app;
