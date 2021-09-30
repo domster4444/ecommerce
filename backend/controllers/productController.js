@@ -1,6 +1,7 @@
 const productSchema = require('../models/productModel');
 const ErrorHandler = require('../utils/errorhandler');
 const catchAsyncErrors = require('../middleware/catchAsyncErrors');
+const ApiFeatures = require('../utils/apifeatures');
 
 //*Create Products --Admin
 exports.createProduct = catchAsyncErrors(async (req, res, next) => {
@@ -37,7 +38,13 @@ exports.getProductDetail = catchAsyncErrors(async (req, res, next) => {
 
 //?get all products
 exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
-  const allProducts = await productSchema.find();
+  //filter api feature
+  const apiFeature = new ApiFeatures(productSchema.find(), req.query)
+    .search()
+    .filter();
+
+  //query of apiFeatureCls is "productSchema.find()"
+  const allProducts = await apiFeature.query;
   res.status(200).json({
     message: 'getAllProduct --route working fine',
     // allproducts:all document just fetched
