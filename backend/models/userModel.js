@@ -3,23 +3,24 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'please enter your name'],
-    maxLength: [30, ' name cannot exceed 30 characters'],
-    minlength: [4, 'name should have more than 4 characters'],
+    required: [true, 'Please Enter Your Name'],
+    maxLength: [30, 'Name cannot exceed 30 characters'],
+    minLength: [4, 'Name should have more than 4 characters'],
   },
   email: {
     type: String,
-    require: [true, 'please enter your email'],
+    required: [true, 'Please Enter Your Email'],
     unique: true,
-    validate: [validator.isEmail, 'please enter a valid email'],
+    validate: [validator.isEmail, 'Please Enter a valid Email'],
   },
   password: {
     type: String,
-    required: [true, 'please enter your password'],
-    minlength: [8, 'password should be more than 8 characters'],
+    required: [true, 'Please Enter Your Password'],
+    minLength: [8, 'Password should be greater than 8 characters'],
     select: false,
   },
   avatar: {
@@ -36,56 +37,50 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'user',
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });
-//*________________hash password
+
 userSchema.pre('save', async function (next) {
-  //? to avoid double hashing of pass
-  // todo:on evey update this executes that triggers hashing too,
-  //todo: so , if model data is being modified then pass this method => next()
-  if (this.isModified('password')) {
+  if (!this.isModified('password')) {
     next();
   }
 
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-//*__________________jwt token
-//?we will generate token & store in cookie
+// JWT TOKEN
 userSchema.methods.getJWTToken = function () {
-  //this = userSchema , so we r forced to use normal-func to access "this"
-  //?when we created jwt token ,
-  //?we gave it id as DECODED DATA
-  //?we gave it secret key
-  //?we gave it expire data
-
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
 };
 
-//*_____________________compare password
-userSchema.methods.comparePassword = async function (enteredPassword) {
-  //this = userSchema , so we r forced to use normal-func to access "this"
+// Compare Password
 
-  //since enteredPassword is unhashed
-  //since storedPassword is hashed
-  //so using compare method of bcrypt
-  return await bcrypt.compare(enteredPassword, this.password);
+userSchema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
 };
 
-//*______________________generate password reset token
+// Generating Password Reset Token
 userSchema.methods.getResetPasswordToken = function () {
-  // Generate Token of 20 char using crypto module
+  // Generating Token
   const resetToken = crypto.randomBytes(20).toString('hex');
-  //hashing and adding to userSchema
+
+  // Hashing and adding resetPasswordToken to userSchema
   this.resetPasswordToken = crypto
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
+
   this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
   return resetToken;
 };
 
-module.exports = mongoose.model('users', userSchema);
+module.exports = mongoose.model('user', userSchema);
