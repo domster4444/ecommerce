@@ -157,43 +157,23 @@ exports.getUserDetail = catchAsyncErrors(async (req, res, next) => {
 });
 
 //* update User Password Aft Login
-// exports.updateUserPassword = catchAsyncErrors(async (req, res, next) => {
-//   //todo: in auth.js if user is loggedIn , req.user= {user document who has logged in }
-//   //we need to access password too from this document so, 👇
-//   console.log('checkpoint');
-//   const user = await userSchema.findById(req.user.id).select('+password');
-//   //todo: check if old pass match with pass in db
-//   const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
-//   if (!isPasswordMatched) {
-//     return next(new ErrorHandler('Invalid email or password', 401));
-//   }
-//   //todo: check  new pass === confirm pass
-//   if (req.body.newPassword !== req.body.confirmPassword) {
-//     return next(
-//       new ErrorHandler('Password doesnot match with confirm password', 401)
-//     );
-//   }
-//   //todo: assign req.body.newPassword to user.password
-//   user.password = req.body.newPassword;
-
-//   await user.save();
-
-//   sendToken(user, 200, res);
-// });
 exports.updateUserPassword = catchAsyncErrors(async (req, res, next) => {
-  console.log(req.user);
+  //todo: in auth.js if user is loggedIn , req.user= {user document who has logged in }
+  //we need to access password too from this document so, 👇
+  console.log('checkpoint');
   const user = await userSchema.findById(req.user.id).select('+password');
-
+  //todo: check if old pass match with pass in db
   const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
-
   if (!isPasswordMatched) {
-    return next(new ErrorHandler('Old password is incorrect', 400));
+    return next(new ErrorHandler('Old password is incorrect', 401));
   }
-
+  //todo: check  new pass === confirm pass
   if (req.body.newPassword !== req.body.confirmPassword) {
-    return next(new ErrorHandler('password does not match', 400));
+    return next(
+      new ErrorHandler('Password doesnot match with confirm password', 401)
+    );
   }
-
+  //todo: assign req.body.newPassword to user.password
   user.password = req.body.newPassword;
 
   await user.save();
