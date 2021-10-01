@@ -34,35 +34,24 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
 exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
 
-  //check if user has given password and email both 401-unauthorized
+  // checking if user has given password and email both
+
   if (!email || !password) {
-    //todo: if email pass not provided 401-not authorized
-    return next(new ErrorHandler('please enter email or password', 401));
+    return next(new ErrorHandler('Please Enter Email & Password', 400));
   }
 
-  //_____had set select:false by default inside model 👇
-  const user = await userSchema.findOne({ email: email }).select('+password');
+  const user = await userSchema.findOne({ email }).select('+password');
+
   if (!user) {
-    //todo:if user not found 401-unauthorized
-    return next(new ErrorHandler('invalid email or password', 401));
+    return next(new ErrorHandler('Invalid email or password', 401));
   }
 
-  // comparing pass with encrypted pass 👀
-  const isPasswordMatched = user.comparePassword(password);
+  const isPasswordMatched = await user.comparePassword(password);
+
   if (!isPasswordMatched) {
-    //todo: if password not matched 401-unauthorized
-    return next(new ErrorHandler('invalid email or password', 401));
+    return next(new ErrorHandler('Invalid email or password', 401));
   }
 
-  //token generated during registration using (.getJWTToken) method of userModel
-  // __________________
-  // const token = user.getJWTToken();
-  // //todo: 201- Created success status
-  // res.status(200).json({
-  //   success: true,
-  //   token,
-  // });
-  // __________________
   sendToken(user, 200, res);
 });
 
@@ -84,7 +73,7 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
   const user = await userSchema.findOne({ email: req.body.email });
 
   if (!user) {
-    return next(new ErrorHander('User not found', 404));
+    return next(new ErrorHandler('User not found', 404));
   }
 
   // Get ResetPassword Token
@@ -94,7 +83,7 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
 
   const resetPasswordUrl = `${req.protocol}://${req.get(
     'host'
-  )}/password/reset/${resetToken}`;
+  )}/api/v1/password/reset/${resetToken}`;
 
   const message = `Your password reset token is :- \n\n ${resetPasswordUrl} \n\nIf you have not requested this email then, please ignore it.`;
 
@@ -116,7 +105,7 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
 
     await user.save({ validateBeforeSave: false });
 
-    return next(new ErrorHander(error.message, 500));
+    return next(new ErrorHandler(error.message, 500));
   }
 });
 
@@ -150,6 +139,62 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
   user.password = req.body.password;
   user.resetPasswordToken = undefined;
   user.resetPasswordExpire = undefined;
+
+  await user.save();
+
+  sendToken(user, 200, res);
+});
+
+//* Get a user Detail Aft Login
+exports.getUserDetail = catchAsyncErrors(async (req, res, next) => {
+  //todo: in auth.js if user is loggedIn , req.user= {user document who has logged in }
+  const user = await userSchema.findById(req.user.id);
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+//* update User Password Aft Login
+// exports.updateUserPassword = catchAsyncErrors(async (req, res, next) => {
+//   //todo: in auth.js if user is loggedIn , req.user= {user document who has logged in }
+//   //we need to access password too from this document so, 👇
+//   console.log('checkpoint');
+//   const user = await userSchema.findById(req.user.id).select('+password');
+//   //todo: check if old pass match with pass in db
+//   const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
+//   if (!isPasswordMatched) {
+//     return next(new ErrorHandler('Invalid email or password', 401));
+//   }
+//   //todo: check  new pass === confirm pass
+//   if (req.body.newPassword !== req.body.confirmPassword) {
+//     return next(
+//       new ErrorHandler('Password doesnot match with confirm password', 401)
+//     );
+//   }
+//   //todo: assign req.body.newPassword to user.password
+//   user.password = req.body.newPassword;
+
+//   await user.save();
+
+//   sendToken(user, 200, res);
+// });
+exports.updateUserPassword = catchAsyncErrors(async (req, res, next) => {
+  console.log(req.user);
+  const user = await userSchema.findById(req.user.id).select('+password');
+
+  const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler('Old password is incorrect', 400));
+  }
+
+  if (req.body.newPassword !== req.body.confirmPassword) {
+    return next(new ErrorHandler('password does not match', 400));
+  }
+
+  user.password = req.body.newPassword;
 
   await user.save();
 

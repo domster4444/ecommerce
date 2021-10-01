@@ -1,3 +1,4 @@
+//*___________________FOR GETTING ACCESS TO req.user by any controller , a route should inhabit (isAuthenticatedUser, controller)
 //todo : authentication for private route
 const ErrorHandler = require('../utils/errorhandler');
 const catchAsyncErrors = require('./catchAsyncErrors');
@@ -21,6 +22,7 @@ exports.isAuthenticatedUser = catchAsyncErrors(async (req, res, next) => {
   const decodedData = jwt.verify(token, process.env.JWT_SECRET);
   //!Eqn - i.) req.user = {document of user who is logged in}
   req.user = await userSchema.findById(decodedData.id);
+
   next();
 });
 
