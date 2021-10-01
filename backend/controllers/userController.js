@@ -5,7 +5,7 @@ const catchAsyncErrors = require('../middleware/catchAsyncErrors');
 const sendEmail = require('../utils/sendEmail');
 const sendToken = require('../utils/jwtToken');
 
-//* Register a user
+//* Register a user --user/admin
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
   const { name, email, password } = req.body;
 
@@ -30,7 +30,7 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
   sendToken(user, 201, res);
 });
 
-//*Login a user
+//*Login a user --user/admin
 exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -55,7 +55,7 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   sendToken(user, 200, res);
 });
 
-//*Logout a user
+//*Logout a user --user/admin
 exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
   res.cookie('token', null, {
     expires: new Date(Date.now()),
@@ -68,7 +68,7 @@ exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-//* Forgot Password --GETLINK
+//* Forgot Password --GETLINK --user/admin
 exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
   const user = await userSchema.findOne({ email: req.body.email });
 
@@ -109,10 +109,10 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-//* Reset Password
+//* Reset Password --user/admin
 exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
   // creating token hash
-  console.log('reset pass route working');
+
   const resetPasswordToken = crypto
     .createHash('sha256')
     .update(req.params.token)
@@ -145,7 +145,7 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
   sendToken(user, 200, res);
 });
 
-//* Get a user Detail Aft Login
+//* Get a userDetail Aft Login --user/admin  (their own profile detail)
 exports.getUserDetail = catchAsyncErrors(async (req, res, next) => {
   //todo: in auth.js if user is loggedIn , req.user= {user document who has logged in }
   const user = await userSchema.findById(req.user.id);
@@ -156,11 +156,11 @@ exports.getUserDetail = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-//* update User Password Aft Login
+//* update User Password Aft Login --user/admin
 exports.updateUserPassword = catchAsyncErrors(async (req, res, next) => {
   //todo: in auth.js if user is loggedIn , req.user= {user document who has logged in }
   //we need to access password too from this document so, 👇
-  console.log('checkpoint');
+
   const user = await userSchema.findById(req.user.id).select('+password');
   //todo: check if old pass match with pass in db
   const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
@@ -198,5 +198,68 @@ exports.updateProfileData = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     success: true,
     user,
+  });
+});
+
+//! get all users --admin ( see all users avaiable)
+exports.getAllUserAdmin = catchAsyncErrors(async (req, res, next) => {
+  const users = await userSchema.find();
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
+
+//! get single userDetail --admin ( see userDetail of anybody by admin)
+exports.getUserDetailAdmin = catchAsyncErrors(async (req, res, next) => {
+  const user = await userSchema.findById(req.params.id);
+  if (!user) {
+    return next(
+      new ErrorHandler(`user does not exist with id: ${req.params.id}`)
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+//! update role of any user --admin ( change userDetail of any user )
+exports.updateAnyProfileAdmin = catchAsyncErrors(async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+    role: req.body.role,
+  };
+
+  //We will add cloudinary later
+  const user = await userSchema.findByIdAndUpdate(req.params.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+//* delete user --admin
+exports.deleteAnyUser = catchAsyncErrors(async (req, res, next) => {
+  const user = await userSchema.findById(req.params.id);
+  //We will remove cloudinary later
+
+  if (!user) {
+    return next(
+      new ErrorHandler(`user do not exist with id ${req.params.id}`, 404)
+    );
+  }
+
+  await user.remove();
+
+  res.status(200).json({
+    success: true,
   });
 });
