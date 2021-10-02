@@ -9,7 +9,7 @@ exports.createProduct = catchAsyncErrors(async (req, res, next) => {
   // when user is logged in , we assigned req.user = {doc of user who logged in }
   // passing req.body.user explicitly
   req.body.user = req.user.id;
-
+  //!directly saving from req.body so, if we send rating & review while createing product, those rating will be saved
   const product = await productSchema.create(req.body);
 
   res.status(201).json({
@@ -78,5 +78,57 @@ exports.deleteProduct = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: 'product deleted successfully',
+  });
+});
+
+//* create new review or update the review
+exports.createProductReview = catchAsyncErrors(async (req, res, next) => {
+  const { rating, comment, productId } = req.body;
+
+  const review = {
+    user: req.user._id,
+    name: req.user.name,
+    rating: Number(rating),
+    comment,
+  };
+
+  const product = await productSchema.findById(productId);
+
+  // todo: does any of the reviews user-id of that product match with loggedIn-user-id ?
+  // todo: by default if no review there still will be review user-id generated automatically ,
+  // todo: due to type: mongoose.Schema.ObjectId,
+
+  //? (if id matched with any of the reviews.user)
+  const isReviewed = product.reviews.find(
+    (rev) => rev.user.toString() === req.user._id.toString()
+  );
+  if (isReviewed) {
+    //todo: iteration on each {} in [{user,name,rating,comment},{user...},{user,...}]
+    product.reviews.forEach((rev) => {
+      // rev = {firstReview} -> {secondReview}
+      //todo:Again, check review user-id with userId of logged in user
+      if (rev.user.toString() === req.user._id.toString()) {
+        //* already reviewed so, update the review ,
+        //*-- editing(updating) review if already reviewed
+        (rev.rating = rating), (rev.comment = comment);
+      }
+    });
+  } else {
+    //NOT REVIEWED THAN execute all below commands
+    product.reviews.push(review);
+    //*reseting "numOfReviews" field in document by recounting total reviews
+    product.numOfReviews = product.reviews.length;
+  }
+  let avg = 0;
+  //iterate through every rating
+  product.ratings =
+    product.reviews.forEach((rev) => {
+      // add rating to avg on every iteration :::aft iteration is finished(avg = totalRatingGiven)
+      avg = avg + rev.rating;
+    }) / product.reviews.length;
+
+  await product.save({ validateBeforeSave: false });
+  res.status(200).json({
+    success: true,
   });
 });
