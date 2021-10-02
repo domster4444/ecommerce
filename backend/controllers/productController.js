@@ -121,12 +121,12 @@ exports.createProductReview = catchAsyncErrors(async (req, res, next) => {
   }
   let avg = 0;
   //iterate through every rating
-  product.ratings =
-    product.reviews.forEach((rev) => {
-      // add rating to avg on every iteration :::aft iteration is finished(avg = totalRatingGiven)
-      avg = avg + rev.rating;
-    }) / product.reviews.length;
-
+  product.reviews.forEach((rev) => {
+    // add rating to avg on every iteration :::aft iteration is finished(avg = totalRatingGiven)
+    avg = avg + rev.rating;
+  });
+  product.rating = avg / product.reviews.length;
+  console.log(product.rating);
   await product.save({ validateBeforeSave: false });
   res.status(200).json({
     success: true,
