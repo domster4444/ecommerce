@@ -32,7 +32,7 @@ exports.getProductDetail = catchAsyncErrors(async (req, res, next) => {
 
 //?get all products
 exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
-  const resultPerPage = 5;
+  const resultPerPage = 8;
   // no of total product document
   const productCount = await productSchema.countDocuments();
   //filter api feature
