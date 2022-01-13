@@ -1,0 +1,35 @@
+footer {
+  background-color: #0f0f2b;
+  color: white;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  font-size: 1.6rem;
+}
+
+footer ul {
+  list-style: none;
+}
+
+footer ul li a {
+  text-decoration: none;
+  color: white;
+}
+
+footer .store-btn {
+  cursor: pointer;
+  border: 1px solid white;
+  margin: 0.5rem;
+  height: 3.5rem;
+  border-radius: 0.5rem;
+  transition: all ease-in-out 300ms;
+}
+
+footer .store-btn:hover {
+  transition: all ease-in-out 300ms;
+  transform: scale(1.1);
+}
+
+.footer_division--right li {
+  margin: 1.5rem 0rem;
+}

@@ -32,9 +32,13 @@ exports.getProductDetail = catchAsyncErrors(async (req, res, next) => {
 
 //?get all products
 exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
+  //!error check for ui react-alert test check-----------
+  // return next(new ErrorHandler('this is my temp err', 404));
+  //!error check for ui react-alert test check-----------
+
   const resultPerPage = 8;
   // no of total product document
-  const productCount = await productSchema.countDocuments();
+  const productsCount = await productSchema.countDocuments();
   //filter api feature
   const apiFeature = new ApiFeatures(productSchema.find(), req.query)
     .search()
@@ -47,7 +51,7 @@ exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
     message: 'getAllProduct --route working fine',
     // allproducts:all document just fetched
     allProducts,
-    productCount,
+    productsCount,
   });
 });
 

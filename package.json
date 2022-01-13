@@ -5,8 +5,9 @@
   "main": "backend/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./backend/server.js",
-    "dev": "nodemon ./backend/server.js"
+    "backend": " cd backend && node server.js",
+    "client": " cd frontend && npm start",
+    "all": " concurrently \"npm run backend\" \"npm run client\""
   },
   "author": "",
   "license": "ISC",
@@ -21,5 +22,8 @@
     "mongoose": "^6.0.8",
     "nodemailer": "^6.6.5",
     "validator": "^13.6.0"
+  },
+  "devDependencies": {
+    "concurrently": "^7.0.0"
   }
 }

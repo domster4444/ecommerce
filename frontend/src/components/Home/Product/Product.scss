@@ -1,0 +1,23 @@
+.product {
+  transition: all ease-in-out 300ms;
+  &:hover {
+    transition: all ease-in-out 300ms;
+    transform: translateY(-1vmax);
+  }
+  text-decoration: none;
+  cursor: pointer;
+  padding: 1rem;
+  margin: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  color: black;
+  width: 20rem;
+  min-width: 15rem;
+  img {
+    width: 100%;
+  }
+  p {
+    color: rgb(129, 129, 129);
+    font-size: 1.6rem;
+  }
+}

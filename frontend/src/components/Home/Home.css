@@ -1,0 +1,60 @@
+.scrollBtn {
+  cursor: pointer;
+  padding: 0.4rem 0.2rem;
+  border-radius: 2rem;
+  font-size: 1.8rem;
+  border: none;
+  box-shadow: 0px 0px 16px 2px #949494;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.scrollBtn:hover {
+  background: black;
+  color: white;
+}
+
+.scrollBtn span {
+  margin: 1rem 0rem;
+}
+
+.scrollBtn svg {
+  font-size: 1.8rem;
+}
+
+#home {
+  font-size: 1.6rem;
+}
+
+#home #hero-section {
+  padding: 5rem 0rem;
+  background: #8c8ce9;
+  clip-path: polygon(0 0, 100% 1%, 100% 81%, 0% 100%);
+  color: white;
+}
+
+#home #hero-section .scrollBtn {
+  transform: translateX(-50%);
+  margin-left: 50%;
+}
+
+#home #hero-section p,
+#home #hero-section h1 {
+  margin: 1.5rem 0rem;
+  text-align: center;
+}
+
+#home #featured-section #title-container {
+  text-align: center;
+}
+
+#home #featured-section #title-text {
+  text-decoration: underline;
+  text-align: center;
+}
+
+#product-container {
+  display: flex;
+  flex-wrap: wrap;
+}
